@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:book_tracker/book_package/src/scripts/books.dart';
+import 'package:books_finder/books_finder.dart';
 import 'package:http/http.dart' as http;
 
 export 'scripts/books.dart';

@@ -1,6 +1,6 @@
 //  Copyright 2020 Bruno D'Luka
 
-import 'package:book_tracker/book_package/src/scripts/extensions.dart';
+import 'package:books_finder/src/scripts/extensions.dart';
 
 class Book {
   const Book({
