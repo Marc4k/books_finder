@@ -62,8 +62,7 @@ Future<List<Book>> queryBooks(
   var q = '$url'
       '${query.trim().replaceAll(' ', '+')}'
       '&maxResults=$maxResults'
-      '&maxResults=$maxResults'
-      '&projection=lite';
+      '&maxResults=$maxResults';
 
   if (langRestrict != null) q += '&langRestrict=$langRestrict';
   if (apiKey != null) q += '&key=$apiKey';
