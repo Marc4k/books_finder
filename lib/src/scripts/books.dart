@@ -1,8 +1,16 @@
 //  Copyright 2020 Bruno D'Luka
 
-import 'extensions.dart';
+import 'package:book_tracker/book_package/src/scripts/extensions.dart';
 
 class Book {
+  const Book({
+    required this.id,
+    required this.info,
+    required this.saleInfo,
+    this.etag,
+    this.selfLink,
+  });
+
   /// The id of the book
   final String id;
   final String? etag;
@@ -16,14 +24,6 @@ class Book {
   /// The information about the book's sale info
   final SaleInfo saleInfo;
 
-  const Book({
-    required this.id,
-    this.etag,
-    required this.info,
-    this.selfLink,
-    required this.saleInfo,
-  });
-
   @override
   String toString() => '$id:${info.title}';
 
@@ -32,31 +32,30 @@ class Book {
     bool reschemeImageLinks = false,
   }) {
     return Book(
-      id: json['id'],
-      etag: json['etag'],
+      id: json['id'] as String,
+      etag: json['etag'] as String?,
       info: BookInfo.fromJson(
-        json['volumeInfo'],
+        json['volumeInfo'] as Map<String, dynamic>,
         reschemeImageLinks: reschemeImageLinks,
       ),
-      selfLink: Uri.parse(json['selfLink']),
-      saleInfo: SaleInfo.fromJson(json['saleInfo']),
+      selfLink: Uri.parse(json['selfLink'] as String),
+      saleInfo: SaleInfo.fromJson(json['saleInfo'] as Map<String, dynamic>),
     );
   }
 }
 
 class IndustryIdentifier {
-  final String type;
-  final String identifier;
-
   const IndustryIdentifier({
     required this.type,
     required this.identifier,
   });
+  final String type;
+  final String identifier;
 
   static IndustryIdentifier fromJson(Map<String, dynamic> json) {
     return IndustryIdentifier(
-      type: json['type'] ?? '',
-      identifier: json['identifier'] ?? '',
+      type: json['type'] as String? ?? '',
+      identifier: json['identifier'] as String? ?? '',
     );
   }
 
@@ -84,15 +83,22 @@ class IndustryIdentifier {
 }
 
 class SaleInfo {
-  final String country;
-  final String saleability;
-  final bool isEbook;
-
   const SaleInfo({
     required this.country,
     required this.saleability,
     required this.isEbook,
   });
+
+  factory SaleInfo.fromJson(Map<String, dynamic> map) {
+    return SaleInfo(
+      country: map['country'] as String? ?? '',
+      saleability: map['saleability'] as String? ?? '',
+      isEbook: map['isEbook'] as bool? ?? false,
+    );
+  }
+  final String country;
+  final String saleability;
+  final bool isEbook;
 
   @override
   String toString() =>
@@ -119,17 +125,31 @@ class SaleInfo {
       'isEbook': isEbook,
     };
   }
-
-  factory SaleInfo.fromJson(Map<String, dynamic> map) {
-    return SaleInfo(
-      country: map['country'] ?? '',
-      saleability: map['saleability'] ?? '',
-      isEbook: map['isEbook'] ?? false,
-    );
-  }
 }
 
 class BookInfo {
+  const BookInfo({
+    required this.title,
+    required this.subtitle,
+    required this.authors,
+    required this.publisher,
+    required this.averageRating,
+    required this.categories,
+    required this.contentVersion,
+    required this.description,
+    required this.industryIdentifiers,
+    required this.imageLinks,
+    required this.language,
+    required this.maturityRating,
+    required this.pageCount,
+    required this.publishedDate,
+    required this.rawPublishedDate,
+    required this.ratingsCount,
+    required this.previewLink,
+    required this.infoLink,
+    required this.canonicalVolumeLink,
+  });
+
   /// The book title
   final String title;
 
@@ -187,28 +207,6 @@ class BookInfo {
   /// The canonical volume link
   final Uri canonicalVolumeLink;
 
-  const BookInfo({
-    required this.title,
-    required this.subtitle,
-    required this.authors,
-    required this.publisher,
-    required this.averageRating,
-    required this.categories,
-    required this.contentVersion,
-    required this.description,
-    required this.industryIdentifiers,
-    required this.imageLinks,
-    required this.language,
-    required this.maturityRating,
-    required this.pageCount,
-    required this.publishedDate,
-    required this.rawPublishedDate,
-    required this.ratingsCount,
-    required this.previewLink,
-    required this.infoLink,
-    required this.canonicalVolumeLink,
-  });
-
   static BookInfo fromJson(
     Map<String, dynamic> json, {
     bool reschemeImageLinks = false,
@@ -220,9 +218,9 @@ class BookInfo {
     DateTime? publishedDate;
     if (publishedDateArray.isNotEmpty) {
       // initialize date
-      int year = int.parse(publishedDateArray[0]);
-      int month = 1;
-      int day = 1;
+      var year = int.parse(publishedDateArray[0]);
+      var month = 1;
+      var day = 1;
 
       // now test the date string
       if (publishedDateArray.length == 1) {
@@ -236,16 +234,16 @@ class BookInfo {
       }
       if (publishedDateArray.length == 3) {
         // assume we have year-month-day
-        year = int.parse(publishedDateArray[0]);
-        month = int.parse(publishedDateArray[1]);
-        day = int.parse(publishedDateArray[2]);
+        year = int.tryParse(publishedDateArray[0]) ?? 0000;
+        month = int.tryParse(publishedDateArray[1]) ?? 0;
+        day = int.tryParse(publishedDateArray[2]) ?? 0;
       }
       publishedDate = DateTime(year, month, day);
     }
 
     final imageLinks = <String, Uri>{};
     (json['imageLinks'] as Map<String, dynamic>?)?.forEach((key, value) {
-      Uri uri = Uri.parse(value.toString());
+      var uri = Uri.parse(value.toString());
       if (reschemeImageLinks) {
         if (uri.isScheme('HTTP')) {
           uri = Uri.parse(value.toString().replaceAll('http://', 'https://'));
@@ -255,27 +253,31 @@ class BookInfo {
     });
 
     return BookInfo(
-      title: json['title'] ?? '',
-      subtitle: json['subtitle'] ?? '',
+      title: json['title'] as String? ?? '',
+      subtitle: json['subtitle'] as String? ?? '',
       authors: ((json['authors'] as List<dynamic>?) ?? []).toStringList(),
-      publisher: json['publisher'] ?? '',
+      publisher: json['publisher'] as String? ?? '',
       averageRating: ((json['averageRating'] ?? 0) as num).toDouble(),
       categories: ((json['categories'] as List<dynamic>?) ?? []).toStringList(),
-      contentVersion: json['contentVersion'] ?? '',
-      description: json['description'] ?? '',
-      language: json['language'] ?? '',
-      maturityRating: json['maturityRating'] ?? '',
-      pageCount: json['pageCount'] ?? 0,
-      ratingsCount: json['ratingsCount'] ?? 0,
+      contentVersion: json['contentVersion'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      language: json['language'] as String? ?? '',
+      maturityRating: json['maturityRating'] as String? ?? '',
+      pageCount: json['pageCount'] as int? ?? 0,
+      ratingsCount: json['ratingsCount'] as int? ?? 0,
       publishedDate: publishedDate,
       rawPublishedDate: (json['publishedDate'] as String?) ?? '',
       imageLinks: imageLinks,
       industryIdentifiers: ((json['industryIdentifiers'] ?? []) as List)
-          .map((i) => IndustryIdentifier.fromJson(i))
+          .map(
+            (dynamic json) =>
+                IndustryIdentifier.fromJson(json as Map<String, dynamic>),
+          )
           .toList(),
-      previewLink: Uri.parse(json['previewLink']),
-      infoLink: Uri.parse(json['infoLink']),
-      canonicalVolumeLink: Uri.parse(json['canonicalVolumeLink']),
+      previewLink: Uri.parse(json['previewLink'] as String? ?? ''),
+      infoLink: Uri.parse(json['infoLink'] as String? ?? ''),
+      canonicalVolumeLink:
+          Uri.parse(json['canonicalVolumeLink'] as String? ?? ''),
     );
   }
 
