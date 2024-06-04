@@ -1,6 +1,6 @@
 //  Copyright 2020 Bruno D'Luka
 
-import 'package:books_finder/books_finder.dart';
+import 'package:books_finder2/books_finder.dart';
 
 void main(List<String> args) async {
   final books = await queryBooks(

@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:books_finder/books_finder.dart';
+import 'package:books_finder2/books_finder.dart';
 import 'package:http/http.dart' as http;
 
 export 'scripts/books.dart';
@@ -62,7 +62,8 @@ Future<List<Book>> queryBooks(
   var q = '$url'
       '${query.trim().replaceAll(' ', '+')}'
       '&maxResults=$maxResults'
-      '&startIndex=$startIndex';
+      '&maxResults=$maxResults'
+      '&projection=lite';
 
   if (langRestrict != null) q += '&langRestrict=$langRestrict';
   if (apiKey != null) q += '&key=$apiKey';
