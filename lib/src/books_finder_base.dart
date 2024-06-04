@@ -1,8 +1,10 @@
 //  Copyright 2020 Bruno D'Luka
 
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'dart:convert';
 
-import 'scripts/books.dart';
+import 'package:book_tracker/book_package/src/scripts/books.dart';
 import 'package:http/http.dart' as http;
 
 export 'scripts/books.dart';
@@ -47,6 +49,7 @@ Future<List<Book>> queryBooks(
   PrintType? printType = PrintType.all,
   int startIndex = 0,
   bool reschemeImageLinks = false,
+  String? apiKey,
 }) async {
   assert(query.isNotEmpty);
 
@@ -54,7 +57,7 @@ Future<List<Book>> queryBooks(
 
   var url = 'https://www.googleapis.com/books/v1/volumes?q=';
 
-  if (queryType != null) url += queryType.name + ':';
+  if (queryType != null) url += '${queryType.name}:';
 
   var q = '$url'
       '${query.trim().replaceAll(' ', '+')}'
@@ -62,6 +65,8 @@ Future<List<Book>> queryBooks(
       '&startIndex=$startIndex';
 
   if (langRestrict != null) q += '&langRestrict=$langRestrict';
+  if (apiKey != null) q += '&key=$apiKey';
+
   if (orderBy != null) {
     q += '&orderBy=${orderBy.toString().replaceAll('OrderBy.', '')}';
   }
@@ -71,14 +76,19 @@ Future<List<Book>> queryBooks(
   final result = await http.get(Uri.parse(q));
   if (result.statusCode == 200) {
     final books = <Book>[];
-    final list = (jsonDecode(result.body))['items'] as List<dynamic>?;
+    final list = jsonDecode(result.body)['items'] as List<dynamic>?;
     if (list == null) return [];
     for (final e in list) {
-      books.add(Book.fromJson(e, reschemeImageLinks: reschemeImageLinks));
+      books.add(
+        Book.fromJson(
+          e as Map<String, dynamic>,
+          reschemeImageLinks: reschemeImageLinks,
+        ),
+      );
     }
     return books;
   } else {
-    throw (result.body);
+    throw result.body;
   }
 }
 
@@ -143,6 +153,6 @@ Future<Book> getSpecificBook(
       reschemeImageLinks: reschemeImageLinks,
     );
   } else {
-    throw (result.body);
+    throw result.body;
   }
 }
