@@ -214,42 +214,35 @@ class BookInfo {
     final publishedDateArray =
         ((json['publishedDate'] as String?) ?? '0000-00-00').split('-');
 
-    // initialize datetime variable
     DateTime? publishedDate;
-    if (publishedDateArray.isNotEmpty) {
-      // initialize date
-      var year = int.parse(publishedDateArray[0]);
-      var month = 1;
-      var day = 1;
-
-      // now test the date string
+    try {
       if (publishedDateArray.length == 1) {
-        // assume we have only the year
-        year = int.parse(publishedDateArray[0]);
+        publishedDate = DateTime(int.parse(publishedDateArray[0]));
+      } else if (publishedDateArray.length == 2) {
+        publishedDate = DateTime(
+          int.parse(publishedDateArray[0]),
+          int.parse(publishedDateArray[1]),
+        );
+      } else if (publishedDateArray.length == 3) {
+        publishedDate = DateTime(
+          int.parse(publishedDateArray[0]),
+          int.parse(publishedDateArray[1]),
+          int.parse(publishedDateArray[2]),
+        );
       }
-      if (publishedDateArray.length == 2) {
-        // assume we have the year and maybe the month (this could be just a speculative case)
-        year = int.parse(publishedDateArray[0]);
-        month = int.parse(publishedDateArray[1]);
-      }
-      if (publishedDateArray.length == 3) {
-        // assume we have year-month-day
-        year = int.tryParse(publishedDateArray[0]) ?? 0000;
-        month = int.tryParse(publishedDateArray[1]) ?? 0;
-        day = int.tryParse(publishedDateArray[2]) ?? 0;
-      }
-      publishedDate = DateTime(year, month, day);
+    } catch (e) {
+      publishedDate = null;
     }
 
     final imageLinks = <String, Uri>{};
     (json['imageLinks'] as Map<String, dynamic>?)?.forEach((key, value) {
       var uri = Uri.parse(value.toString());
       if (reschemeImageLinks) {
-        if (uri.isScheme('HTTP')) {
+        if (uri.isScheme('http')) {
           uri = Uri.parse(value.toString().replaceAll('http://', 'https://'));
         }
       }
-      imageLinks.addAll({key: uri});
+      imageLinks[key] = uri;
     });
 
     return BookInfo(
@@ -269,10 +262,8 @@ class BookInfo {
       rawPublishedDate: (json['publishedDate'] as String?) ?? '',
       imageLinks: imageLinks,
       industryIdentifiers: ((json['industryIdentifiers'] ?? []) as List)
-          .map(
-            (dynamic json) =>
-                IndustryIdentifier.fromJson(json as Map<String, dynamic>),
-          )
+          .map((dynamic json) =>
+              IndustryIdentifier.fromJson(json as Map<String, dynamic>))
           .toList(),
       previewLink: Uri.parse(json['previewLink'] as String? ?? ''),
       infoLink: Uri.parse(json['infoLink'] as String? ?? ''),
