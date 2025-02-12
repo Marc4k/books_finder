@@ -231,6 +231,7 @@ class BookInfo {
         );
       }
     } catch (e) {
+      print(e);
       publishedDate = null;
     }
 

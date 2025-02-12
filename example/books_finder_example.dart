@@ -4,8 +4,8 @@ import 'package:books_finder2/books_finder.dart';
 
 void main(List<String> args) async {
   final books = await queryBooks(
-    'twilight',
-    maxResults: 3,
+    'Maxwel',
+    maxResults: 10,
     printType: PrintType.books,
     orderBy: OrderBy.relevance,
     reschemeImageLinks: true,
